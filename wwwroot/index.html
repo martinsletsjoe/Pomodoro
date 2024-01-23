@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script>
+        // model
+        var startingTime = 3600;
+        var seconds = startingTime;
+        var countdownInterval;
+
+        updateView();
+        function updateView() {
+            document.getElementById('app').innerHTML = /*HTML*/`
+                <button onclick=changeTime(1)>↑</button>
+                <button onclick=changeTime(-1)>↓</button>
+                <div>${Show()}</div>
+                <button onclick=start()>Start</button>
+                <button onclick=stop()>Stop</button>
+                <button onclick=reset()>Reset</button>
+                `;
+            console.log(seconds);
+        }
+
+        function Show(){
+            var minutes = Math.floor(seconds / 60);
+            var remainingSeconds = seconds % 60;
+
+            var formattedMinutes = minutes.toString().padStart(2,'0');
+            var formattedSeconds = remainingSeconds.toString().padStart(2,'0');
+
+            var timer = formattedMinutes + ':' + formattedSeconds;
+            checkIfFinished()
+            return timer;
+        }
+
+
+        //kontrollere
+        function changeTime(number){
+            if(seconds <= 0)return;
+            seconds += (300*number);
+            updateView();
+        }
+
+        function countDown(){
+            seconds--;
+            updateView()
+        }
+
+        function checkIfFinished() {
+            if (seconds < 0) {
+                clearInterval(countdownInterval)
+            }
+        }
+
+        function start(){
+            clearInterval(countdownInterval);
+            countdownInterval = setInterval(countDown, 1000)
+        }
+
+        function stop(){
+            clearInterval(countdownInterval)
+        }
+
+        function reset(){
+            clearInterval(countdownInterval)
+            seconds = startingTime;
+            updateView();
+        }
+
+
+
+    </script>
+</body>
+
+</html>
