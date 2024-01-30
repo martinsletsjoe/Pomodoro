@@ -29,51 +29,9 @@
 
         getData();
 
-        updateView();
-        function updateView() {
-            document.getElementById('app').innerHTML = /*HTML*/`
-                    <button onclick=adjustTimer(1)>↑</button>
-                    <button onclick=adjustTimer(-1)>↓</button>
-                    <div>${formatTime()}</div>
-                    <button onclick=startTimer()>Start</button>
-                    <button onclick=stopTimer()>Stop</button>
-                    <button onclick=resetTimer()>Reset</button>
-                    <table>
-                        <tr>
-                            <th>Start Time</th>
-                            <th>End Time</th>
-                        </tr>
-                            ${createPomodoroLogHtml()}
-
-                    </table>
-
-                    `;
-        }
-
-        function createPomodoroLogHtml() {
-            return model.log.map(log => /*HTML*/`
-                <tr>
-                    <td>${log.startTime}</td>
-                    <td> ${log.endTime}</td>
-                    <td><button onclick="deleteLogItem(${log.id})">x</button>
-                </tr>
-                `).join('');
-        }
 
 
-        function formatTime() {
-            if (model.clock[1].seconds === null) { setTime() }
-            let seconds = model.clock[1].seconds;
-            let minutes = Math.floor(seconds / 60);
-            let remainingSeconds = seconds % 60;
 
-            let formattedMinutes = minutes.toString().padStart(2, '0');
-            let formattedSeconds = remainingSeconds.toString().padStart(2, '0');
-
-            let timer = formattedMinutes + ':' + formattedSeconds;
-            checkTimerCompletion()
-            return timer;
-        }
 
         //kontrollere
         async function getData() {
@@ -82,8 +40,42 @@
             updateView()
         }
 
+        updateView();
+        function updateView() {
+            document.getElementById('app').innerHTML = /*HTML*/`
+                <button onclick=adjustTimer(1)>↑</button>
+                <button onclick=adjustTimer(-1)>↓</button>
+                <div>${stopwatch()}</div>
+                <button onclick=startTimer()>Start</button>
+                <button onclick=stopTimer()>Stop</button>
+                <button onclick=resetTimer()>Reset</button>
+                <table>
+                    <tr>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                    </tr>                    
+                        ${createPomodoroLogHtml()}                    
+                </table>
+                
 
-        async function deleteLogItem(id) {
+                `;
+        }
+
+        function createPomodoroLogHtml() {
+            return model.log.map(log => /*HTML*/`
+            <tr>
+                <td>${log.startTime}</td>
+                <td> ${log.endTime}</td>
+                <td><button onclick="deleteLogItem(${log.id})">x</button>
+            </tr>
+            `).join('');
+        }
+
+
+
+
+        //kontrollere
+        function deleteLogItem(id) {
 
         }
 
@@ -103,29 +95,51 @@
             updateView();
         }
 
-        async function startTimer() {
-            clearInterval(model.clock[2].timerInterval);
-            model.clock[2].timerInterval = setInterval(updateTimer, 1000)
-
+        function logEndTime(stop) {
             const now = new Date();
             const hours = now.getHours();
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
-            // model.log.start = started;
-            const item = model.log[2].startTime = hours + ':' + minutes + ':' + seconds;
-            const response = await axios.post('/pomodoro', item);
-            await getData();
-            checkTimerCompletion(model.log[2].startTime);
+            var logLength = model.log.length
+            if (stop) { return model.log[logLength - 1].endTime = hours + ':' + minutes + ':' + seconds };
+            if (!model.log[logLength]) {
+                model.log.push({ id: logLength + 1, startTime: hours + ':' + minutes + ':' + seconds, endTime: null });
+            }
         }
 
+        // Stoppeklokka
+        function stopwatch() {
+            if (model.clock[1].seconds === null) { setTime() }
+            let seconds = model.clock[1].seconds;
+            let minutes = Math.floor(seconds / 60);
+            let remainingSeconds = seconds % 60;
 
+            let formattedMinutes = minutes.toString().padStart(2, '0');
+            let formattedSeconds = remainingSeconds.toString().padStart(2, '0');
 
-        function checkTimerCompletion() {
+            let timer = formattedMinutes + ':' + formattedSeconds;
+            checkTimerCompletion()
+            return timer;
+        }
+
+        function startTimer() {
+            if (model.clock[1].seconds <= 0) resetTimer();
+            clearInterval(model.clock[2].timerInterval);
+            model.clock[2].timerInterval = setInterval(updateTimer, 1000)
+            logEndTime()
+        }
+
+        function checkTimerCompletion(started) {
             var seconds = model.clock[1].seconds;
             if (seconds <= 0) {
                 clearInterval(model.clock[2].timerInterval)
-                logEndTime()
+                logEndTime("stop")
             }
+        }
+
+        function updateTimer() {
+            model.clock[1].seconds--;
+            updateView()
         }
 
         function stopTimer() {
@@ -138,18 +152,8 @@
             updateView();
         }
 
-        function updateTimer() {
-            model.clock[1].seconds--;
-            updateView()
-        }
 
-        function logEndTime() {
-            const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const seconds = now.getSeconds();
-            model.log[2].endTime = hours + ':' + minutes + ':' + seconds;
-        }
+
 
     </script>
 </body>
