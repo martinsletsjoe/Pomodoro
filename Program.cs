@@ -11,11 +11,11 @@ namespace Pomodoro
 
             var inMemoryDb = new List<PomodoroItem>()
             {
-                new PomodoroItem(),
-
+                new PomodoroItem(new DateTime(2024,1,1,13,0,0), new DateTime(2024,1,1,14,0,0)),
+                new PomodoroItem(new DateTime(2024,1,1,13,0,0), new DateTime(2024,1,1,14,0,0)),
             };
 
-            app.MapGet("/test", () =>
+        app.MapGet("/pomodoro", () =>
             {
                 return inMemoryDb;
             });
@@ -25,3 +25,5 @@ namespace Pomodoro
         }
     }
 }
+
+//stopwatch klasse ferdig i c#

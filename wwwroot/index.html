@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <title>Document</title>
     <style>
         body {
@@ -17,72 +18,139 @@
     <div id="app"></div>
     <script>
         // model
-        var startingTime = 3600;
-        var seconds = startingTime;
-        var countdownInterval;
+        const model = {
+            clock: [
+                { initialTimerValue: 5 },
+                { seconds: null },
+                { timerInterval: null },
+            ],
+            
+        }
+
+        getData();
 
         updateView();
         function updateView() {
             document.getElementById('app').innerHTML = /*HTML*/`
-                <button onclick=changeTime(1)>↑</button>
-                <button onclick=changeTime(-1)>↓</button>
-                <div>${Show()}</div>
-                <button onclick=start()>Start</button>
-                <button onclick=stop()>Stop</button>
-                <button onclick=reset()>Reset</button>
-                `;
-            console.log(seconds);
+                    <button onclick=adjustTimer(1)>↑</button>
+                    <button onclick=adjustTimer(-1)>↓</button>
+                    <div>${formatTime()}</div>
+                    <button onclick=startTimer()>Start</button>
+                    <button onclick=stopTimer()>Stop</button>
+                    <button onclick=resetTimer()>Reset</button>
+                    <table>
+                        <tr>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                        </tr>
+                            ${createPomodoroLogHtml()}
+
+                    </table>
+
+                    `;
         }
 
-        function Show(){
-            var minutes = Math.floor(seconds / 60);
-            var remainingSeconds = seconds % 60;
+        function createPomodoroLogHtml() {
+            return model.log.map(log => /*HTML*/`
+                <tr>
+                    <td>${log.startTime}</td>
+                    <td> ${log.endTime}</td>
+                    <td><button onclick="deleteLogItem(${log.id})">x</button>
+                </tr>
+                `).join('');
+        }
 
-            var formattedMinutes = minutes.toString().padStart(2,'0');
-            var formattedSeconds = remainingSeconds.toString().padStart(2,'0');
 
-            var timer = formattedMinutes + ':' + formattedSeconds;
-            checkIfFinished()
+        function formatTime() {
+            if (model.clock[1].seconds === null) { setTime() }
+            let seconds = model.clock[1].seconds;
+            let minutes = Math.floor(seconds / 60);
+            let remainingSeconds = seconds % 60;
+
+            let formattedMinutes = minutes.toString().padStart(2, '0');
+            let formattedSeconds = remainingSeconds.toString().padStart(2, '0');
+
+            let timer = formattedMinutes + ':' + formattedSeconds;
+            checkTimerCompletion()
             return timer;
         }
 
-
         //kontrollere
-        function changeTime(number){
-            if(seconds <= 0)return;
-            seconds += (300*number);
-            updateView();
-        }
-
-        function countDown(){
-            seconds--;
+        async function getData() {
+            const response = await axios.get('/pomodoro');
+            model.log = response.data;
             updateView()
         }
 
-        function checkIfFinished() {
-            if (seconds < 0) {
-                clearInterval(countdownInterval)
-            }
+
+        async function deleteLogItem(id) {
+
         }
 
-        function start(){
-            clearInterval(countdownInterval);
-            countdownInterval = setInterval(countDown, 1000)
+        function setTime() {
+            model.clock[1].seconds = model.clock[0].initialTimerValue
+            updateView()
         }
 
-        function stop(){
-            clearInterval(countdownInterval)
-        }
+        function adjustTimer(timeChangeAmount) {
+            let startingTime = model.clock[0].initialTimerValue
+            startingTime += (300 * timeChangeAmount);
 
-        function reset(){
-            clearInterval(countdownInterval)
-            seconds = startingTime;
+            if (startingTime < 0) { startingTime = 0 };
+
+            model.clock[0].initialTimerValue = startingTime
+            setTime()
             updateView();
         }
 
+        async function startTimer() {
+            clearInterval(model.clock[2].timerInterval);
+            model.clock[2].timerInterval = setInterval(updateTimer, 1000)
 
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            // model.log.start = started;
+            const item = model.log[2].startTime = hours + ':' + minutes + ':' + seconds;
+            const response = await axios.post('/pomodoro', item);
+            await getData();
+            checkTimerCompletion(model.log[2].startTime);
+        }
+
+
+
+        function checkTimerCompletion() {
+            var seconds = model.clock[1].seconds;
+            if (seconds <= 0) {
+                clearInterval(model.clock[2].timerInterval)
+                logEndTime()
+            }
+        }
+
+        function stopTimer() {
+            clearInterval(model.clock[2].timerInterval)
+        }
+
+        function resetTimer() {
+            clearInterval(model.clock[2].timerInterval)
+            model.clock[1].seconds = model.clock[0].initialTimerValue;
+            updateView();
+        }
+
+        function updateTimer() {
+            model.clock[1].seconds--;
+            updateView()
+        }
+
+        function logEndTime() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            model.log[2].endTime = hours + ':' + minutes + ':' + seconds;
+        }
 
     </script>
 </body>
-
 </html>
