@@ -13,6 +13,16 @@
             Id = Guid.NewGuid();
         }
 
+        public string FormattedStartTime
+        {
+            get { return StartTime.ToString("HH:mm:ss"); }
+        }   
+        public string FormattedEndTime
+        {
+            get { return EndTime?.ToString("HH:mm:ss"); }
+        }
+
+
         //public void StartTimer()
         //{
         //    StartTime = DateTime.Now;
