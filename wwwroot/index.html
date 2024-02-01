@@ -31,33 +31,23 @@
 
         function updateView() {
             document.getElementById('app').innerHTML = /*HTML*/`
-                        <button onclick=adjustTimer(1)>↑</button>
-                        <button onclick=adjustTimer(-1)>↓</button>
-                        <div>${stopwatch()}</div>
-                        <button onclick=startTimer()>Start</button>
-                        <button onclick=stopTimer()>Stop</button>
-                        <button onclick=resetTimer()>Reset</button>
-                        <table>
-                            <tr>
-                                <th>Start Time</th>
-                                <th>End Time</th>
-                            </tr>
-                                ${createPomodoroLogHtml()}
-                        </table>
+                            <button onclick=adjustTimer(1)>↑</button>
+                            <button onclick=adjustTimer(-1)>↓</button>
+                            <div>${stopwatch()}</div>
+                            <button onclick=startTimer()>Start</button>
+                            <button onclick=stopTimer()>Stop</button>
+                            <button onclick=resetTimer()>Reset</button>
+                            <table>
+                                <tr>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                </tr>
+                                    ${createPomodoroLogHtml()}
+                            </table>
 
 
-                        `;
+                            `;
         }
-
-
-        //kontrollere
-        async function getData() {
-            const response = await axios.get('/pomodoro');
-
-            model.log = response.data;
-            updateView()
-        }
-
         function createPomodoroLogHtml() {
             return model.log.map(log => {
                 var startTime = new Date(log.startTime);
@@ -69,16 +59,21 @@
                 var endTimeFormatted = endTime ? endTime.toISOString().substr(11, 8) : '';
 
                 return /*HTML*/`
-                    <tr>
-                        <td>${startTimeFormatted}</td>
-                        <td>${endTimeFormatted}</td>
-                        <td><button onclick="deleteLogItem(${log.id})">x</button></td>
-                    </tr>
-                `;
+                        <tr>
+                            <td>${startTimeFormatted}</td>
+                            <td>${endTimeFormatted}</td>
+                            <td><button onclick="deleteLogItem(${log.id})">x</button></td>
+                        </tr>
+                    `;
             }).join('');
         }
 
 
+        async function getData() {
+            const response = await axios.get('/pomodoro');
+            model.log = response.data;
+            updateView()
+        }
 
 
         //kontrollere
@@ -102,15 +97,26 @@
             updateView();
         }
 
-        function logEndTime(stop) {
+        async function logEndTime(stop) {
             const now = new Date();
             const nowISO = now.toISOString();
-            var logLength = model.log.length
 
-            if (stop) { return model.log[logLength - 1].endTime = nowISO };
-            if (!model.log[logLength]) {
-                model.log.push({ id: logLength + 1, startTime: nowISO });
+            const pomodoroItem = {
+                startTime: nowISO,
+                endTime: stop ? nowISO : null
+            };
+            if (stop) {
+                try {
+                    await axios.post('/pomodoro', pomodoroItem);
+                    await getData();
+                } catch (error) {
+                    console.error('Error', error)
+                }
             }
+            //if (stop) { return model.log[logLength - 1].endTime = nowISO };
+            //if (!model.log[logLength]) {
+            //    model.log.push({startTime: nowISO });
+            //}
         }
 
         // Stoppeklokka

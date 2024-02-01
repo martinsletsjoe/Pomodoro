@@ -15,15 +15,20 @@ namespace Pomodoro
                 new PomodoroItem(new DateTime(2024,1,1,13,0,0), new DateTime(2024,1,1,14,0,0)),
             };
 
-        app.MapGet("/pomodoro", () =>
+            app.MapGet("/pomodoro", () =>
+                {
+                    return inMemoryDb;
+                });
+
+            app.MapPost("/pomodoro", (PomodoroItem pomodoroItem) =>
             {
-                return inMemoryDb;
+                inMemoryDb.Add(pomodoroItem);
             });
+
+
 
             app.UseStaticFiles();
             app.Run();
         }
     }
 }
-
-//stopwatch klasse ferdig i c#
