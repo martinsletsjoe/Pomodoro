@@ -25,6 +25,11 @@ namespace Pomodoro
                 inMemoryDb.Add(pomodoroItem);
             });
 
+            app.MapDelete("/pomodoro/{id}", (Guid id ) =>
+            {
+                inMemoryDb.RemoveAll(li => li.Id == id);
+            });
+
 
 
             app.UseStaticFiles();

@@ -16,14 +16,5 @@
         {
             Id = Guid.NewGuid();
         }
-
-
-
-
-        //public void StartTimer()
-        //{
-        //    StartTime = DateTime.Now;
-        //}
-
     }
 }
