@@ -84,15 +84,16 @@
         }
 
 
-        async function logEndTime(stop) {
-            const now = new Date();
-            const nowISO = now.toISOString();
+        async function logEndTime(time) {
+            const logTimes = []
+            logTimes.push(time)
+            console.log(logTimes.length)
 
             const pomodoroItem = {
-                startTime: nowISO,
-                endTime: stop ? nowISO : null
+                startTime: logTimes[0],
+                endTime: logTimes.length >= 2 ? logTimes[1] : null
             };
-            if (stop) {
+            if (logTimes.length >= 2) {
                 try {
                     await axios.post('/pomodoro', pomodoroItem);
                     await getData();
@@ -138,16 +139,20 @@
 
         function startTimer() {
             if (model.clock[1].seconds <= 0) resetTimer();
-            //clearInterval(model.clock[2].timerInterval);
             model.clock[2].timerInterval = setInterval(updateTimer, 1000)
-            logEndTime()
+
+            const now = new Date();
+            const nowISO = now.toISOString();
+            logEndTime(nowISO)
         }
 
         function checkTimerCompletion() {
             var seconds = model.clock[1].seconds;
             if (seconds <= 0) {
                 clearInterval(model.clock[2].timerInterval)
-                logEndTime("stop")
+                const now = new Date();
+                const nowISO = now.toISOString();
+                logEndTime(nowISO)
             }
         }
 
