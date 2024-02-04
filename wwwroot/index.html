@@ -23,7 +23,9 @@
                 { initialTimerValue: 5 },
                 { seconds: null },
                 { timerInterval: null },
+                { logTimes: [] },
             ],
+
 
         }
 
@@ -31,22 +33,22 @@
 
         function updateView() {
             document.getElementById('app').innerHTML = /*HTML*/`
-                                <button onclick=adjustTimer(1)>↑</button>
-                                <button onclick=adjustTimer(-1)>↓</button>
-                                <div>${stopwatch()}</div>
-                                <button onclick=startTimer()>Start</button>
-                                <button onclick=stopTimer()>Stop</button>
-                                <button onclick=resetTimer()>Reset</button>
-                                <table>
-                                    <tr>
-                                        <th>Start Time</th>
-                                        <th>End Time</th>
-                                    </tr>
-                                        ${createPomodoroLogHtml()}
-                                </table>
+                                            <button onclick=adjustTimer(1)>↑</button>
+                                            <button onclick=adjustTimer(-1)>↓</button>
+                                            <div>${stopwatch()}</div>
+                                            <button onclick=startTimer()>Start</button>
+                                            <button onclick=stopTimer()>Stop</button>
+                                            <button onclick=resetTimer()>Reset</button>
+                                            <table>
+                                                <tr>
+                                                    <th>Start Time</th>
+                                                    <th>End Time</th>
+                                                </tr>
+                                                    ${createPomodoroLogHtml()}
+                                            </table>
 
 
-                                `;
+                                            `;
         }
         function createPomodoroLogHtml() {
             return model.log.map(log => {
@@ -60,12 +62,12 @@
                 var endTimeFormatted = endTime ? endTime.toLocaleString('no-NO', { timeZone: 'Europe/Paris' }).substr(10, 8) : '';
 
                 return /*HTML*/`
-                    <tr>
-                        <td>${startTimeFormatted}</td>
-                        <td>${endTimeFormatted}</td>
-                        <td><button onclick="deleteLogItem('${log.id}')">x</button></td>
-                    </tr>
-                        `;
+                                <tr>
+                                    <td>${startTimeFormatted}</td>
+                                    <td>${endTimeFormatted}</td>
+                                    <td><button onclick="deleteLogItem('${log.id}')">x</button></td>
+                                </tr>
+                                    `;
             }).join('');
         }
 
@@ -81,26 +83,6 @@
         async function deleteLogItem(id) {
             const response = await axios.delete('/pomodoro/' + id);
             await getData();
-        }
-
-
-        async function logEndTime(time) {
-            const logTimes = []
-            logTimes.push(time)
-            console.log(logTimes.length)
-
-            const pomodoroItem = {
-                startTime: logTimes[0],
-                endTime: logTimes.length >= 2 ? logTimes[1] : null
-            };
-            if (logTimes.length >= 2) {
-                try {
-                    await axios.post('/pomodoro', pomodoroItem);
-                    await getData();
-                } catch (error) {
-                    console.error('Error', error)
-                }
-            }
         }
 
         function setTime() {
@@ -137,13 +119,30 @@
             return timer;
         }
 
+        async function logEndTime(time) {
+            var logTimes = model.clock[3].logTimes;
+            logTimes.push(time)
+            console.log(logTimes.length)
+            if (logTimes.length >= 2) {
+                const pomodoroItem = {
+                    startTime: logTimes[0],
+                    endTime: logTimes[1]
+                };
+                try {
+                    await axios.post('/pomodoro', pomodoroItem);
+                    await getData();
+                } catch (error) {
+                    console.error('Error', error)
+                }
+            }
+        }
+
         function startTimer() {
             if (model.clock[1].seconds <= 0) resetTimer();
             model.clock[2].timerInterval = setInterval(updateTimer, 1000)
 
             const now = new Date();
-            const nowISO = now.toISOString();
-            logEndTime(nowISO)
+            logEndTime(now)
         }
 
         function checkTimerCompletion() {
@@ -151,8 +150,7 @@
             if (seconds <= 0) {
                 clearInterval(model.clock[2].timerInterval)
                 const now = new Date();
-                const nowISO = now.toISOString();
-                logEndTime(nowISO)
+                logEndTime(now)
             }
         }
 
