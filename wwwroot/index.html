@@ -133,8 +133,10 @@
                     await getData();
                 } catch (error) {
                     console.error('Error', error)
+                } finally {
+                    model.clock[3].logTimes = [];
                 }
-            }
+            }   
         }
 
         function startTimer() {
