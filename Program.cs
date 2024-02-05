@@ -1,3 +1,6 @@
+using System.Data.SqlClient;
+using System.Data.SqlTypes;
+using Dapper;
 using Pomodoro.Model;
 
 namespace Pomodoro
@@ -8,26 +11,39 @@ namespace Pomodoro
         {
             var builder = WebApplication.CreateBuilder(args);
             var app = builder.Build();
+            const string connStr = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Pomodoro;Integrated Security=True;";
 
-            var inMemoryDb = new List<PomodoroItem>()
+
+
+            app.MapGet("/pomodoro", async () =>
             {
-                new PomodoroItem(new DateTime(2024,1,1,13,0,0), new DateTime(2024,1,1,14,0,0)),
-                new PomodoroItem(new DateTime(2024,1,1,13,0,0), new DateTime(2024,1,1,14,0,0)),
-            };
-
-            app.MapGet("/pomodoro", () =>
+                try
                 {
-                    return inMemoryDb;
-                });
-
-            app.MapPost("/pomodoro", (PomodoroItem pomodoroItem) =>
-            {
-                inMemoryDb.Add(pomodoroItem);
+                    var conn = new SqlConnection(connStr);
+                    const string sql = "SELECT Id, EndTime, StartTime FROM Pomodoro ORDER BY StartTime DESC";
+                    var pomodoroItems = await conn.QueryAsync<PomodoroItem>(sql);
+                    return pomodoroItems;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
             });
 
-            app.MapDelete("/pomodoro/{id}", (Guid id ) =>
+            app.MapPost("/pomodoro", async (PomodoroItem pomodoroItem) =>
             {
-                inMemoryDb.RemoveAll(li => li.Id == id);
+                var conn = new SqlConnection(connStr);
+                const string sql = "INSERT Pomodoro(Id, EndTime, StartTime) VALUES(@Id, @EndTime, @StartTime)";
+                var rowsAffected = await conn.ExecuteAsync(sql, pomodoroItem);
+                return rowsAffected;
+            });
+
+            app.MapDelete("/pomodoro/{id}", async (Guid id ) =>
+            {
+                    var conn = new SqlConnection(connStr);
+                    const string sql = "DELETE FROM Pomodoro WHERE Id = @Id";
+                    var rowsAffected = await conn.ExecuteAsync(sql, new { Id = id });
+                    return rowsAffected;
             });
 
 

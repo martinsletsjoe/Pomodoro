@@ -53,13 +53,13 @@
         function createPomodoroLogHtml() {
             return model.log.map(log => {
                 var startTime = new Date(log.startTime);
-                var endTime = log.endTime ? new Date(log.endTime) : null
+                var endTime = new Date(log.endTime);
 
                 //startTime.setHours(startTime.getHours() + 1)
                 //endTime.setHours(endTime.getHours() + 1)
 
-                var startTimeFormatted = startTime.toLocaleString('no-NO', { timeZone: 'Europe/Paris' }).substr(10, 8);
-                var endTimeFormatted = endTime ? endTime.toLocaleString('no-NO', { timeZone: 'Europe/Paris' }).substr(10, 8) : '';
+                var startTimeFormatted = startTime.toLocaleTimeString('no-NO', { hour12: false });
+                var endTimeFormatted = endTime.toLocaleTimeString('no-NO', { hour12: false });
 
                 return /*HTML*/`
                                 <tr>
@@ -136,11 +136,11 @@
                 } finally {
                     model.clock[3].logTimes = [];
                 }
-            }   
+            }
         }
 
         function startTimer() {
-            if (model.clock[1].seconds <= 0) resetTimer();
+            if (model.clock[1].seconds <= 0) resetTimer()
             model.clock[2].timerInterval = setInterval(updateTimer, 1000)
 
             const now = new Date();
