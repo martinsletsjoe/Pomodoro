@@ -5,13 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="styles.css"/>
     <title>Document</title>
-    <style>
-        body {
-            background-color: black;
-            color: white;
-        }
-    </style>
 </head>
 
 <body>
@@ -24,6 +19,7 @@
                 { seconds: null },
                 { timerInterval: null },
                 { logTimes: [] },
+                { isRunning: false },
             ],
 
 
@@ -33,23 +29,30 @@
 
         function updateView() {
             document.getElementById('app').innerHTML = /*HTML*/`
-                                            <button onclick=adjustTimer(1)>↑</button>
-                                            <button onclick=adjustTimer(-1)>↓</button>
-                                            <div>${stopwatch()}</div>
-                                            <button onclick=startTimer()>Start</button>
-                                            <button onclick=stopTimer()>Stop</button>
-                                            <button onclick=resetTimer()>Reset</button>
-                                            <table>
-                                                <tr>
-                                                    <th>Start Time</th>
-                                                    <th>End Time</th>
-                                                </tr>
-                                                    ${createPomodoroLogHtml()}
-                                            </table>
-
-
-                                            `;
+            <div class="clock">hei</div>
+            <div class="sidebar-log">
+                <table>
+                    <tr>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                    </tr>
+                    ${createPomodoroLogHtml()}
+                </table>
+            </div>
+            <div class="main">
+                <div class="arrowButtons">
+                    <button onclick=adjustTimer(1)>↑</button>
+                    <button onclick=adjustTimer(-1)>↓</button>
+                </div>
+                <div class="stopwatch">${stopwatch()}</div>
+                <div class="controlButtons">
+                    <button onclick=startTimer()>Start</button>
+                    <button onclick=stopTimer()>Stop</button>
+                    <button onclick=resetTimer()>Reset</button>
+                </div>
+            </div>`;
         }
+
         function createPomodoroLogHtml() {
             return model.log.map(log => {
                 var startTime = new Date(log.startTime);
@@ -62,12 +65,12 @@
                 var endTimeFormatted = endTime.toLocaleTimeString('no-NO', { hour12: false });
 
                 return /*HTML*/`
-                                <tr>
-                                    <td>${startTimeFormatted}</td>
-                                    <td>${endTimeFormatted}</td>
-                                    <td><button onclick="deleteLogItem('${log.id}')">x</button></td>
-                                </tr>
-                                    `;
+                    <tr>
+                        <td>${startTimeFormatted}</td>
+                        <td>${endTimeFormatted}</td>
+                        <td><button onclick="deleteLogItem('${log.id}')">x</button></td>
+                    </tr>
+                                                `;
             }).join('');
         }
 
@@ -140,17 +143,27 @@
         }
 
         function startTimer() {
-            if (model.clock[1].seconds <= 0) resetTimer()
-            model.clock[2].timerInterval = setInterval(updateTimer, 1000)
+            if (model.clock[4].isRunning) return
+            else if (model.clock[1].seconds <= 0) {
+                resetTimer()
+            } else if (model.clock[0].initialTimerValue == model.clock[1].seconds) {
+                model.clock[2].timerInterval = setInterval(updateTimer, 1000)
 
-            const now = new Date();
-            logEndTime(now)
+                model.clock[4].isRunning = true;
+                const now = new Date();
+                logEndTime(now)
+            } else {
+                model.clock[2].timerInterval = setInterval(updateTimer, 1000)
+
+                model.clock[4].isRunning = true;
+            }
         }
 
         function checkTimerCompletion() {
             var seconds = model.clock[1].seconds;
             if (seconds <= 0) {
                 clearInterval(model.clock[2].timerInterval)
+                model.clock[4].isRunning = false;
                 const now = new Date();
                 logEndTime(now)
             }
@@ -160,16 +173,17 @@
             model.clock[1].seconds--;
             checkTimerCompletion()
             updateView()
-
         }
 
         function stopTimer() {
             clearInterval(model.clock[2].timerInterval)
+            model.clock[4].isRunning = false;
         }
 
         function resetTimer() {
             clearInterval(model.clock[2].timerInterval)
             model.clock[1].seconds = model.clock[0].initialTimerValue;
+            model.clock[4].isRunning = false;
             updateView();
         }
 
