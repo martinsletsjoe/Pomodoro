@@ -30,7 +30,21 @@
         function updateView() {
             document.getElementById('app').innerHTML = /*HTML*/`
             <div class="clock">hei</div>
-            <div class="sidebar-log">
+
+            <div class="main">
+            <div>
+                    <button onclick=adjustTimer(1)>↑</button>
+                    <button onclick=adjustTimer(-1)>↓</button>
+                </div>
+                ${stopwatch()}
+                <div>
+                    <button onclick=startTimer()>Start</button>
+                    <button onclick=stopTimer()>Stop</button>
+                    <button onclick=resetTimer()>Reset</button>
+                </div>
+            </div>
+
+            <div class="sidebar">
                 <table>
                     <tr>
                         <th>Start Time</th>
@@ -38,18 +52,6 @@
                     </tr>
                     ${createPomodoroLogHtml()}
                 </table>
-            </div>
-            <div class="main">
-                <div class="arrowButtons">
-                    <button onclick=adjustTimer(1)>↑</button>
-                    <button onclick=adjustTimer(-1)>↓</button>
-                </div>
-                <div class="stopwatch">${stopwatch()}</div>
-                <div class="controlButtons">
-                    <button onclick=startTimer()>Start</button>
-                    <button onclick=stopTimer()>Stop</button>
-                    <button onclick=resetTimer()>Reset</button>
-                </div>
             </div>`;
         }
 

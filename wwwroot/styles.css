@@ -2,42 +2,29 @@
     background-color: rgb(30, 6, 55);
     color: white;
 }
-.app {
+#app {
     display: grid;
-    height: 100vh;
-    width: 100vw;
-    grid-template-columns: auto;/*33vh 33vh 33vh*/;
-    grid-template-rows:auto /* 33vh 33vh 33vh*/;
+    height: 100%;
+    width: 100%;
+    grid-template-columns: repeat(3, 1fr);
     grid-template-areas:
         "header main main"
+        "sidebar main main"
         "sidebar main main";
 }
+
 .main {
     grid-area: main;
     background-color: tomato;
 }
-.stopwatch {
-    font-size:200px;
-    /*text-align:center;*/
-    place-self: center;
-}
-.sidebar-log {
+
+.sidebar {
     grid-area: sidebar;
     background-color: green;
 }
+
 .clock {
     grid-area: header;
-    height: 150px;
     background-color: goldenrod;
-    font-size:100px
+    font-size: 100px
 }
-/*.arrow {*/
-    /* Arrow 1 */
-    /*color: green;
-    box-sizing: border-box;
-    position: absolute;
-    width: 125px;
-    height: 0px;
-    border: 15px solid rgba(226, 76, 42, 0.7);
-    transform: rotate(-90deg);
-}*/
