@@ -1,21 +1,25 @@
 ﻿body {
     background-color: rgb(30, 6, 55);
     color: white;
+    margin: 0;
+    padding: 0;
 }
 #app {
     display: grid;
-    height: 100%;
+    height: 100vh;
     width: 100%;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     grid-template-areas:
-        "header main main"
-        "sidebar main main"
-        "sidebar main main";
+        "header main main main"
+        "sidebar main main main"
+        "sidebar main main main"
+        "sidebar main main main";
 }
 
 .main {
     grid-area: main;
-    background-color: tomato;
+    background-color: yellowgreen;
+    text-align: center;
 }
 
 .sidebar {
@@ -27,4 +31,14 @@
     grid-area: header;
     background-color: goldenrod;
     font-size: 100px
+}
+.stopwatch-interface {
+    margin-top: 20%
+}
+.stopwatch {
+    font-size: 30vh;
+}
+.adjustmentButtons {
+    width: 30px;
+    text-align: left;
 }

@@ -29,18 +29,18 @@
 
         function updateView() {
             document.getElementById('app').innerHTML = /*HTML*/`
-            <div class="clock">hei</div>
+            <div class="clock">klokke</div>
 
             <div class="main">
-            <div>
-                    <button onclick=adjustTimer(1)>↑</button>
-                    <button onclick=adjustTimer(-1)>↓</button>
-                </div>
-                ${stopwatch()}
-                <div>
-                    <button onclick=startTimer()>Start</button>
-                    <button onclick=stopTimer()>Stop</button>
-                    <button onclick=resetTimer()>Reset</button>
+                <div class="stopwatch-interface">
+                    
+                        <button onclick=adjustTimer(1) class="adjustmentButtons">↑</button><br/>
+                        <button onclick=adjustTimer(-1)>↓</button>
+                     
+                           <div class="stopwatch"> ${stopwatch()}</div>
+                        <button onclick=startTimer()>Start</button>
+                        <button onclick=stopTimer()>Stop</button>
+                        <button onclick=resetTimer()>Reset</button>
                 </div>
             </div>
 
